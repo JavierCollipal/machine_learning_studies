@@ -4,6 +4,15 @@
 # https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 
 from scrapy import signals
+import scrapy
+from scrapy.http import HtmlResponse
+
+
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.options import Options
+import time
+
 
 # useful for handling different item types with a single interface
 from itemadapter import is_item, ItemAdapter
@@ -101,3 +110,40 @@ class TomatoDeficienciesScrappingDownloaderMiddleware:
 
     def spider_opened(self, spider):
         spider.logger.info("Spider opened: %s" % spider.name)
+
+class CustomSeleniumMiddleware:
+    @classmethod
+    def from_crawler(cls, crawler):
+        settings = crawler.settings
+        driver_name = settings.get('SELENIUM_DRIVER_NAME', 'chrome')
+        driver_executable_path = settings.get('SELENIUM_DRIVER_EXECUTABLE_PATH')
+        driver_arguments = settings.get('SELENIUM_DRIVER_ARGUMENTS', [])
+
+        middleware = cls(driver_name, driver_executable_path, driver_arguments)
+        crawler.signals.connect(middleware.spider_closed, signal=signals.spider_closed)
+        return middleware
+
+    def __init__(self, driver_name, driver_executable_path, driver_arguments):
+        if driver_name == 'chrome':
+            chrome_options = webdriver.ChromeOptions()
+            for argument in driver_arguments:
+                chrome_options.add_argument(argument)
+            service = Service(driver_executable_path)
+            self.driver = webdriver.Chrome(service=service, options=chrome_options)
+        else:
+            raise ValueError(f"Driver '{driver_name}' is not supported")
+
+    def process_request(self, request, spider):
+        self.driver.get(request.url)
+        time.sleep(2)  # wait for the page to load
+        response = HtmlResponse(
+            url=self.driver.current_url,
+            body=self.driver.page_source,
+            encoding='utf-8',
+            request=request,
+        )
+        response.meta['driver'] = self.driver
+        return response
+
+    def spider_closed(self, spider):
+        self.driver.quit()

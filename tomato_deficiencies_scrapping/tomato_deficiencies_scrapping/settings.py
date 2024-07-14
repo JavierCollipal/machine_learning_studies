@@ -11,8 +11,15 @@ BOT_NAME = "tomato_deficiencies_scrapping"
 
 SPIDER_MODULES = ["tomato_deficiencies_scrapping.spiders"]
 NEWSPIDER_MODULE = "tomato_deficiencies_scrapping.spiders"
+  
+SELENIUM_DRIVER_NAME = 'chrome'
+SELENIUM_DRIVER_EXECUTABLE_PATH = r'C:\Users\lanita\Documents\chromedriver-win64\chromedriver.exe'
+SELENIUM_DRIVER_ARGUMENTS=['--headless']  
 
-
+DOWNLOADER_MIDDLEWARES = {
+    'scrapy_selenium.SeleniumMiddleware': 800,
+    'tomato_deficiencies_scrapping.middlewares.CustomSeleniumMiddleware': 543,
+}
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = "tomato_deficiencies_scrapping (+http://www.yourdomain.com)"
 # User Agent
