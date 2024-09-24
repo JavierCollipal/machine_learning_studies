@@ -7,8 +7,8 @@ __pycache__/
 *.so
 #models
 tomato_vision_detection/best_tomato_plant_vit_model.pth
- tomato_vision_detection/tomato_plant_vit_model.pth
- tomato_vision_detection/TomatoPlantfactoryDataset/
+tomato_vision_detection/tomato_plant_vit_model.pth
+tomato_vision_detection/TomatoPlantfactoryDataset/
 # Distribution / packaging
 myenv/
 .Python
